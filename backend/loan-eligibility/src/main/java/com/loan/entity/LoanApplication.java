@@ -2,8 +2,7 @@ package com.loan.entity;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.DBRef;
-import jakarta.validation.constraints.*;
+import org.springframework.data.mongodb.core.mapping.Field;
 import java.time.LocalDateTime;
 
 @Document(collection = "loan_applications")
@@ -12,259 +11,156 @@ public class LoanApplication {
     @Id
     private String id;
     
-    @NotBlank(message = "Applicant name is required")
-    private String applicantName;
+    @Field("user_id")
+    private String userId;
     
-    @Email(message = "Email should be valid")
-    @NotBlank(message = "Email is required")
+    private String name;
     private String email;
-    
-    @NotBlank(message = "Phone is required")
     private String phone;
+    private int age;
     
-    @NotNull(message = "Monthly income is required")
-    @DecimalMin(value = "0.0", inclusive = false, message = "Monthly income must be greater than 0")
-    private Double monthlyIncome;
+    @Field("annual_income")
+    private double annualIncome;
     
-    @NotNull(message = "Loan amount is required")
-    @DecimalMin(value = "1000.0", message = "Minimum loan amount is 1000")
-    @DecimalMax(value = "10000000.0", message = "Maximum loan amount is 10,000,000")
-    private Double loanAmount;
+    @Field("credit_score")
+    private int creditScore;
     
-    @NotNull(message = "Loan term is required")
-    @Min(value = 1, message = "Loan term must be at least 1 month")
-    @Max(value = 360, message = "Loan term cannot exceed 360 months")
-    private Integer loanTerm; // in months
+    @Field("monthly_debt_payments")
+    private double monthlyDebtPayments;
     
-    @NotBlank(message = "Employment status is required")
-    private String employmentStatus; // EMPLOYED, SELF_EMPLOYED, UNEMPLOYED
+    @Field("requested_amount")
+    private double requestedAmount;
     
-    @Min(value = 0, message = "Work experience cannot be negative")
-    private Integer workExperience; // in years
+    @Field("loan_tenure")
+    private int loanTenure; // in months
     
-    @DecimalMin(value = "0.0", message = "Existing debt cannot be negative")
-    private Double existingDebt;
+    @Field("employment_type")
+    private String employmentType;
     
-    @Min(value = 300, message = "Credit score must be at least 300")
-    @Max(value = 850, message = "Credit score cannot exceed 850")
-    private Integer creditScore;
+    @Field("loan_purpose")
+    private String loanPurpose;
     
-    // Eligibility result fields
-    private Boolean isEligible;
+    // Eligibility results
+    private boolean eligible;
+    
+    @Field("eligibility_reason")
     private String eligibilityReason;
-    private Double approvedAmount;
-    private String riskLevel; // LOW, MEDIUM, HIGH
-    private Double interestRate;
+    
+    @Field("approved_amount")
+    private double approvedAmount;
+    
+    @Field("interest_rate")
+    private double interestRate;
+    
+    @Field("monthly_emi")
+    private double monthlyEmi;
     
     // Application status
-    private String status; // PENDING, APPROVED, REJECTED, UNDER_REVIEW
+    private String status; // PENDING, APPROVED, REJECTED, PROCESSING
     
-    // Timestamps
-    private LocalDateTime appliedAt;
-    private LocalDateTime processedAt;
+    @Field("created_at")
+    private LocalDateTime createdAt;
+    
+    @Field("updated_at")
     private LocalDateTime updatedAt;
     
-    // Reference to user (optional)
-    @DBRef
-    private User user;
-    
     // Constructors
-    public LoanApplication() {
-        this.appliedAt = LocalDateTime.now();
+    public LoanApplication() {}
+    
+    public LoanApplication(String name, String email, String phone, int age, 
+                          double annualIncome, int creditScore, double monthlyDebtPayments,
+                          double requestedAmount, int loanTenure, String employmentType,
+                          String loanPurpose) {
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+        this.age = age;
+        this.annualIncome = annualIncome;
+        this.creditScore = creditScore;
+        this.monthlyDebtPayments = monthlyDebtPayments;
+        this.requestedAmount = requestedAmount;
+        this.loanTenure = loanTenure;
+        this.employmentType = employmentType;
+        this.loanPurpose = loanPurpose;
+        this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
         this.status = "PENDING";
     }
     
     // Getters and Setters
-    public String getId() {
-        return id;
-    }
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
     
-    public void setId(String id) {
-        this.id = id;
-    }
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
     
-    public String getApplicantName() {
-        return applicantName;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
     
-    public void setApplicantName(String applicantName) {
-        this.applicantName = applicantName;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
     
-    public String getEmail() {
-        return email;
-    }
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
     
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    public int getAge() { return age; }
+    public void setAge(int age) { this.age = age; }
     
-    public String getPhone() {
-        return phone;
-    }
+    public double getAnnualIncome() { return annualIncome; }
+    public void setAnnualIncome(double annualIncome) { this.annualIncome = annualIncome; }
     
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
+    public int getCreditScore() { return creditScore; }
+    public void setCreditScore(int creditScore) { this.creditScore = creditScore; }
     
-    public Double getMonthlyIncome() {
-        return monthlyIncome;
-    }
+    public double getMonthlyDebtPayments() { return monthlyDebtPayments; }
+    public void setMonthlyDebtPayments(double monthlyDebtPayments) { this.monthlyDebtPayments = monthlyDebtPayments; }
     
-    public void setMonthlyIncome(Double monthlyIncome) {
-        this.monthlyIncome = monthlyIncome;
-    }
+    public double getRequestedAmount() { return requestedAmount; }
+    public void setRequestedAmount(double requestedAmount) { this.requestedAmount = requestedAmount; }
     
-    public Double getLoanAmount() {
-        return loanAmount;
-    }
+    public int getLoanTenure() { return loanTenure; }
+    public void setLoanTenure(int loanTenure) { this.loanTenure = loanTenure; }
     
-    public void setLoanAmount(Double loanAmount) {
-        this.loanAmount = loanAmount;
-    }
+    public String getEmploymentType() { return employmentType; }
+    public void setEmploymentType(String employmentType) { this.employmentType = employmentType; }
     
-    public Integer getLoanTerm() {
-        return loanTerm;
-    }
+    public String getLoanPurpose() { return loanPurpose; }
+    public void setLoanPurpose(String loanPurpose) { this.loanPurpose = loanPurpose; }
     
-    public void setLoanTerm(Integer loanTerm) {
-        this.loanTerm = loanTerm;
-    }
+    public boolean isEligible() { return eligible; }
+    public void setEligible(boolean eligible) { this.eligible = eligible; }
     
-    public String getEmploymentStatus() {
-        return employmentStatus;
-    }
+    public String getEligibilityReason() { return eligibilityReason; }
+    public void setEligibilityReason(String eligibilityReason) { this.eligibilityReason = eligibilityReason; }
     
-    public void setEmploymentStatus(String employmentStatus) {
-        this.employmentStatus = employmentStatus;
-    }
+    public double getApprovedAmount() { return approvedAmount; }
+    public void setApprovedAmount(double approvedAmount) { this.approvedAmount = approvedAmount; }
     
-    public Integer getWorkExperience() {
-        return workExperience;
-    }
+    public double getInterestRate() { return interestRate; }
+    public void setInterestRate(double interestRate) { this.interestRate = interestRate; }
     
-    public void setWorkExperience(Integer workExperience) {
-        this.workExperience = workExperience;
-    }
+    public double getMonthlyEmi() { return monthlyEmi; }
+    public void setMonthlyEmi(double monthlyEmi) { this.monthlyEmi = monthlyEmi; }
     
-    public Double getExistingDebt() {
-        return existingDebt;
-    }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
     
-    public void setExistingDebt(Double existingDebt) {
-        this.existingDebt = existingDebt;
-    }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     
-    public Integer getCreditScore() {
-        return creditScore;
-    }
-    
-    public void setCreditScore(Integer creditScore) {
-        this.creditScore = creditScore;
-    }
-    
-    public Boolean getIsEligible() {
-        return isEligible;
-    }
-    
-    public void setIsEligible(Boolean isEligible) {
-        this.isEligible = isEligible;
-    }
-    
-    public String getEligibilityReason() {
-        return eligibilityReason;
-    }
-    
-    public void setEligibilityReason(String eligibilityReason) {
-        this.eligibilityReason = eligibilityReason;
-    }
-    
-    public Double getApprovedAmount() {
-        return approvedAmount;
-    }
-    
-    public void setApprovedAmount(Double approvedAmount) {
-        this.approvedAmount = approvedAmount;
-    }
-    
-    public String getRiskLevel() {
-        return riskLevel;
-    }
-    
-    public void setRiskLevel(String riskLevel) {
-        this.riskLevel = riskLevel;
-    }
-    
-    public Double getInterestRate() {
-        return interestRate;
-    }
-    
-    public void setInterestRate(Double interestRate) {
-        this.interestRate = interestRate;
-    }
-    
-    public String getStatus() {
-        return status;
-    }
-    
-    public void setStatus(String status) {
-        this.status = status;
-        this.updatedAt = LocalDateTime.now();
-    }
-    
-    public LocalDateTime getAppliedAt() {
-        return appliedAt;
-    }
-    
-    public void setAppliedAt(LocalDateTime appliedAt) {
-        this.appliedAt = appliedAt;
-    }
-    
-    public LocalDateTime getProcessedAt() {
-        return processedAt;
-    }
-    
-    public void setProcessedAt(LocalDateTime processedAt) {
-        this.processedAt = processedAt;
-    }
-    
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-    
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-    
-    public User getUser() {
-        return user;
-    }
-    
-    public void setUser(User user) {
-        this.user = user;
-    }
-    
-    // Helper method to calculate debt-to-income ratio
-    public Double getDebtToIncomeRatio() {
-        if (monthlyIncome == null || monthlyIncome <= 0) {
-            return null;
-        }
-        double monthlyDebt = (existingDebt != null ? existingDebt : 0.0);
-        return (monthlyDebt / monthlyIncome) * 100;
-    }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
     
     @Override
     public String toString() {
         return "LoanApplication{" +
                 "id='" + id + '\'' +
-                ", applicantName='" + applicantName + '\'' +
+                ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
-                ", loanAmount=" + loanAmount +
-                ", monthlyIncome=" + monthlyIncome +
+                ", requestedAmount=" + requestedAmount +
                 ", status='" + status + '\'' +
-                ", isEligible=" + isEligible +
-                ", appliedAt=" + appliedAt +
+                ", eligible=" + eligible +
+                ", createdAt=" + createdAt +
                 '}';
     }
 }

@@ -1,104 +1,394 @@
 package com.loan.controller;
 
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.ResponseEntity;
-import java.util.Map;
-import java.util.HashMap;
 
+
+import com.loan.entity.LoanApplication;
+import com.loan.entity.User;
+import com.loan.service.LoanApplicationService;
+import com.loan.service.LoanEligibilityService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
-
-
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.validation.annotation.Validated;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "*") // Allow all origins for development
+@Validated
 public class LoanController {
-
+    
     @Autowired
-    private MongoTemplate mongoTemplate;
-
-    @GetMapping("/test-db")
-public ResponseEntity<Map<String, String>> testDatabase() {
-    Map<String, String> response = new HashMap<>();
-    try {
-        String dbName = mongoTemplate.getDb().getName();
-        response.put("status", "SUCCESS");
-        response.put("message", "MongoDB connected successfully");
-        response.put("database", dbName);
-        return ResponseEntity.ok(response);
-    } catch (Exception e) {
-        response.put("status", "ERROR");
-        response.put("message", "Database connection failed: " + e.getMessage());
-        return ResponseEntity.status(500).body(response);
-    }
-}
+    private LoanEligibilityService eligibilityService;
     
-    @GetMapping("/")
-    public ResponseEntity<Map<String, String>> home() {
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "Welcome to Loan Eligibility Portal API!");
-        response.put("status", "Server is running successfully");
-        response.put("version", "1.0.0");
-        return ResponseEntity.ok(response);
-    }
+    @Autowired
+    private LoanApplicationService applicationService;
     
-    @GetMapping("/health")
-    public ResponseEntity<Map<String, String>> health() {
-        Map<String, String> response = new HashMap<>();
-        response.put("status", "UP");
-        response.put("service", "Loan Eligibility Service");
-        return ResponseEntity.ok(response);
-    }
-    
+    // 1. Check Eligibility Endpoint
     @PostMapping("/check-eligibility")
-    public ResponseEntity<Map<String, Object>> checkEligibility(@RequestBody Map<String, Object> request) {
-        Map<String, Object> response = new HashMap<>();
-        
-        // Extract loan application data
-        String name = (String) request.get("name");
-        Double income = Double.valueOf(request.get("income").toString());
-        Double loanAmount = Double.valueOf(request.get("loanAmount").toString());
-        Integer creditScore = Integer.valueOf(request.get("creditScore").toString());
-        
-        // Simple eligibility logic
-        boolean isEligible = false;
-        String reason = "";
-        
-        if (income >= 30000 && creditScore >= 650 && loanAmount <= (income * 5)) {
-            isEligible = true;
-            reason = "Congratulations! You are eligible for the loan.";
-        } else if (income < 30000) {
-            reason = "Income too low. Minimum required: ₹30,000";
-        } else if (creditScore < 650) {
-            reason = "Credit score too low. Minimum required: 650";
-        } else if (loanAmount > (income * 5)) {
-            reason = "Loan amount too high. Maximum allowed: 5x your annual income";
+    public ResponseEntity<?> checkEligibility(@Valid @RequestBody EligibilityRequestDTO request) {
+        try {
+            // Convert DTO to service request
+            LoanEligibilityService.EligibilityRequest serviceRequest = new LoanEligibilityService.EligibilityRequest(
+                request.getName(),
+                request.getAge(),
+                request.getAnnualIncome(),
+                request.getCreditScore(),
+                request.getMonthlyDebtPayments(),
+                request.getRequestedAmount(),
+                request.getLoanTenure(),
+                request.getEmploymentType()
+            );
+            
+            // Check eligibility
+            LoanEligibilityService.EligibilityResult result = eligibilityService.checkEligibility(serviceRequest);
+            
+            // Create response
+            Map<String, Object> response = new HashMap<>();
+            response.put("eligible", result.isEligible());
+            response.put("reason", result.getReason());
+            response.put("maxLoanAmount", result.getMaxLoanAmount());
+            response.put("approvedAmount", result.getApprovedAmount());
+            response.put("interestRate", result.getInterestRate());
+            response.put("monthlyEmi", result.getMonthlyEmi());
+            response.put("timestamp", System.currentTimeMillis());
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Failed to check eligibility");
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
-        
-        response.put("applicantName", name);
-        response.put("eligible", isEligible);
-        response.put("reason", reason);
-        response.put("income", income);
-        response.put("loanAmount", loanAmount);
-        response.put("creditScore", creditScore);
+    }
+    
+    // 2. Save Application Endpoint
+    @PostMapping("/save-application")
+    public ResponseEntity<?> saveApplication(@Valid @RequestBody SaveApplicationRequestDTO request) {
+        try {
+            // Convert DTO to service request
+            LoanApplicationService.LoanApplicationRequest serviceRequest = new LoanApplicationService.LoanApplicationRequest();
+            
+            // Basic info
+            serviceRequest.setName(request.getName());
+            serviceRequest.setEmail(request.getEmail());
+            serviceRequest.setPhone(request.getPhone());
+            serviceRequest.setAge(request.getAge());
+            serviceRequest.setAnnualIncome(request.getAnnualIncome());
+            serviceRequest.setCreditScore(request.getCreditScore());
+            serviceRequest.setMonthlyDebtPayments(request.getMonthlyDebtPayments());
+            serviceRequest.setRequestedAmount(request.getRequestedAmount());
+            serviceRequest.setLoanTenure(request.getLoanTenure());
+            serviceRequest.setEmploymentType(request.getEmploymentType());
+            serviceRequest.setLoanPurpose(request.getLoanPurpose());
+            
+            // Eligibility results
+            serviceRequest.setEligible(request.isEligible());
+            serviceRequest.setEligibilityReason(request.getEligibilityReason());
+            serviceRequest.setApprovedAmount(request.getApprovedAmount());
+            serviceRequest.setInterestRate(request.getInterestRate());
+            serviceRequest.setMonthlyEmi(request.getMonthlyEmi());
+            
+            // Save application
+            LoanApplication savedApplication = applicationService.saveApplication(serviceRequest);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Application saved successfully");
+            response.put("applicationId", savedApplication.getId());
+            response.put("status", savedApplication.getStatus());
+            response.put("timestamp", System.currentTimeMillis());
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "Failed to save application");
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+    
+    // 3. Get Applications by Email
+    @GetMapping("/get-applications")
+    public ResponseEntity<?> getApplications(@RequestParam String email) {
+        try {
+            List<LoanApplication> applications = applicationService.getApplicationsByEmail(email);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("applications", applications);
+            response.put("count", applications.size());
+            response.put("timestamp", System.currentTimeMillis());
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "Failed to retrieve applications");
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+    
+    // 4. Get All Applications (Admin)
+    @GetMapping("/admin/applications")
+    public ResponseEntity<?> getAllApplications() {
+        try {
+            List<LoanApplication> applications = applicationService.getAllApplications();
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("applications", applications);
+            response.put("count", applications.size());
+            response.put("timestamp", System.currentTimeMillis());
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "Failed to retrieve applications");
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+    
+    // 5. Get Application by ID
+    @GetMapping("/application/{id}")
+    public ResponseEntity<?> getApplicationById(@PathVariable String id) {
+        try {
+            Optional<LoanApplication> application = applicationService.getApplicationById(id);
+            
+            if (application.isPresent()) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", true);
+                response.put("application", application.get());
+                response.put("timestamp", System.currentTimeMillis());
+                return ResponseEntity.ok(response);
+            } else {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("success", false);
+                errorResponse.put("error", "Application not found");
+                errorResponse.put("message", "No application found with ID: " + id);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            }
+            
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "Failed to retrieve application");
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+    
+    // 6. Update Application Status (Admin)
+    @PutMapping("/admin/application/{id}/status")
+    public ResponseEntity<?> updateApplicationStatus(@PathVariable String id, @RequestBody Map<String, String> statusUpdate) {
+        try {
+            String newStatus = statusUpdate.get("status");
+            if (newStatus == null || newStatus.trim().isEmpty()) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("success", false);
+                errorResponse.put("error", "Status is required");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            }
+            
+            LoanApplication updatedApplication = applicationService.updateApplicationStatus(id, newStatus.toUpperCase());
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Application status updated successfully");
+            response.put("application", updatedApplication);
+            response.put("timestamp", System.currentTimeMillis());
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (RuntimeException e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "Application not found");
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "Failed to update application status");
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+    
+    // 7. Get Application Statistics (Admin)
+    @GetMapping("/admin/stats")
+    public ResponseEntity<?> getApplicationStats() {
+        try {
+            LoanApplicationService.ApplicationStats stats = applicationService.getApplicationStats();
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("stats", stats);
+            response.put("timestamp", System.currentTimeMillis());
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "Failed to retrieve statistics");
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+    
+    // 8. Get User by Email
+    @GetMapping("/user")
+    public ResponseEntity<?> getUserByEmail(@RequestParam String email) {
+        try {
+            User user = applicationService.getUserByEmail(email);
+            
+            if (user != null) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", true);
+                response.put("user", user);
+                response.put("timestamp", System.currentTimeMillis());
+                return ResponseEntity.ok(response);
+            } else {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("success", false);
+                errorResponse.put("error", "User not found");
+                errorResponse.put("message", "No user found with email: " + email);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            }
+            
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "Failed to retrieve user");
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+    
+    // 9. Health Check Endpoint
+    @GetMapping("/health")
+    public ResponseEntity<?> healthCheck() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "UP");
+        response.put("message", "Loan Eligibility API is running");
+        response.put("timestamp", System.currentTimeMillis());
+        response.put("version", "1.0.0");
         
         return ResponseEntity.ok(response);
     }
+
     
-    @GetMapping("/loan-types")
-    public ResponseEntity<Map<String, Object>> getLoanTypes() {
-        Map<String, Object> response = new HashMap<>();
-        Map<String, String> loanTypes = new HashMap<>();
+    
+    // DTO Classes for Request/Response
+    public static class EligibilityRequestDTO {
+        @NotBlank(message = "Name is required")
+        private String name;
         
-        loanTypes.put("personal", "Personal Loan - 10-15% interest");
-        loanTypes.put("home", "Home Loan - 7-9% interest");
-        loanTypes.put("car", "Car Loan - 8-12% interest");
-        loanTypes.put("education", "Education Loan - 6-10% interest");
+        @Min(value = 18, message = "Age must be at least 18")
+        @Max(value = 65, message = "Age must be at most 65")
+        private int age;
         
-        response.put("loanTypes", loanTypes);
-        response.put("message", "Available loan types");
+        @Min(value = 0, message = "Annual income must be positive")
+        private double annualIncome;
         
-        return ResponseEntity.ok(response);
+        @Min(value = 300, message = "Credit score must be at least 300")
+        @Max(value = 850, message = "Credit score must be at most 850")
+        private int creditScore;
+        
+        @Min(value = 0, message = "Monthly debt payments cannot be negative")
+        private double monthlyDebtPayments;
+        
+        @Min(value = 1000, message = "Requested amount must be at least 1000")
+        private double requestedAmount;
+        
+        @Min(value = 6, message = "Loan tenure must be at least 6 months")
+        @Max(value = 360, message = "Loan tenure must be at most 360 months")
+        private int loanTenure;
+        
+        @NotBlank(message = "Employment type is required")
+        private String employmentType;
+        
+        // Getters and Setters
+        public String getName() { return name; }
+        public void setName(String name) { this.name = name; }
+        
+        public int getAge() { return age; }
+        public void setAge(int age) { this.age = age; }
+        
+        public double getAnnualIncome() { return annualIncome; }
+        public void setAnnualIncome(double annualIncome) { this.annualIncome = annualIncome; }
+        
+        public int getCreditScore() { return creditScore; }
+        public void setCreditScore(int creditScore) { this.creditScore = creditScore; }
+        
+        public double getMonthlyDebtPayments() { return monthlyDebtPayments; }
+        public void setMonthlyDebtPayments(double monthlyDebtPayments) { this.monthlyDebtPayments = monthlyDebtPayments; }
+        
+        public double getRequestedAmount() { return requestedAmount; }
+        public void setRequestedAmount(double requestedAmount) { this.requestedAmount = requestedAmount; }
+        
+        public int getLoanTenure() { return loanTenure; }
+        public void setLoanTenure(int loanTenure) { this.loanTenure = loanTenure; }
+        
+        public String getEmploymentType() { return employmentType; }
+        public void setEmploymentType(String employmentType) { this.employmentType = employmentType; }
+    }
+    
+    public static class SaveApplicationRequestDTO extends EligibilityRequestDTO {
+        @NotBlank(message = "Email is required")
+        @Email(message = "Email should be valid")
+        private String email;
+        
+        @NotBlank(message = "Phone is required")
+        private String phone;
+        
+        private String loanPurpose;
+        
+        // Eligibility results
+        private boolean eligible;
+        private String eligibilityReason;
+        private double approvedAmount;
+        private double interestRate;
+        private double monthlyEmi;
+        
+        // Getters and Setters
+        public String getEmail() { return email; }
+        public void setEmail(String email) { this.email = email; }
+        
+        public String getPhone() { return phone; }
+        public void setPhone(String phone) { this.phone = phone; }
+        
+        public String getLoanPurpose() { return loanPurpose; }
+        public void setLoanPurpose(String loanPurpose) { this.loanPurpose = loanPurpose; }
+        
+        public boolean isEligible() { return eligible; }
+        public void setEligible(boolean eligible) { this.eligible = eligible; }
+        
+        public String getEligibilityReason() { return eligibilityReason; }
+        public void setEligibilityReason(String eligibilityReason) { this.eligibilityReason = eligibilityReason; }
+        
+        public double getApprovedAmount() { return approvedAmount; }
+        public void setApprovedAmount(double approvedAmount) { this.approvedAmount = approvedAmount; }
+        
+        public double getInterestRate() { return interestRate; }
+        public void setInterestRate(double interestRate) { this.interestRate = interestRate; }
+        
+        public double getMonthlyEmi() { return monthlyEmi; }
+        public void setMonthlyEmi(double monthlyEmi) { this.monthlyEmi = monthlyEmi; }
     }
 }

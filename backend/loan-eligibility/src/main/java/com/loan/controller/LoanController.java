@@ -5,10 +5,34 @@ import org.springframework.http.ResponseEntity;
 import java.util.Map;
 import java.util.HashMap;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+
+
+
 @RestController
 @RequestMapping("/api")
 @CrossOrigin(origins = "*")
 public class LoanController {
+
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
+    @GetMapping("/test-db")
+public ResponseEntity<Map<String, String>> testDatabase() {
+    Map<String, String> response = new HashMap<>();
+    try {
+        String dbName = mongoTemplate.getDb().getName();
+        response.put("status", "SUCCESS");
+        response.put("message", "MongoDB connected successfully");
+        response.put("database", dbName);
+        return ResponseEntity.ok(response);
+    } catch (Exception e) {
+        response.put("status", "ERROR");
+        response.put("message", "Database connection failed: " + e.getMessage());
+        return ResponseEntity.status(500).body(response);
+    }
+}
     
     @GetMapping("/")
     public ResponseEntity<Map<String, String>> home() {

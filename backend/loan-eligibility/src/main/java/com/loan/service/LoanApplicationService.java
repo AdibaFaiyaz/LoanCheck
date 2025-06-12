@@ -10,11 +10,23 @@ import java.util.List;
 import java.util.Optional;
 
 
+import org.springframework.stereotype.Service;
+
+
+ @Service
 public class LoanApplicationService {
     
     @Autowired
     private LoanApplicationRepository loanApplicationRepository;
+   
+
     
+    // Your methods here
+    public boolean checkEligibility(String name, String email, String phone) {
+        // Your loan eligibility logic
+        return true;
+    }
+
     @Autowired
     private UserRepository userRepository;
     

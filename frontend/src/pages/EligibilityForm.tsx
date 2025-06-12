@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { FiUser, FiDollarSign, FiCalendar, FiCreditCard, FiLoader } from "react-icons/fi";
 
 // API configuration
-const API_BASE_URL = 'http://localhost:53789'; // Update with your actual port
+const API_BASE_URcdL = 'http://localhost:53789'; // Update with your actual port
 
 interface LoanEligibilityResponse {
   applicantName: string;

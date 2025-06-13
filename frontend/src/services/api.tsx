@@ -1,10 +1,26 @@
-import type{ 
+import type { 
   LoanApplication, 
   LoginData, 
   User, 
   RegisterData 
 } from '../types/index';
+
 const API_BASE_URL = 'http://localhost:8080';
+
+// Additional types for API responses
+interface EligibilityRequest {
+  monthlyIncome: number;
+  creditScore: number;
+  employmentStatus: string;
+  loanAmount: number;
+}
+
+interface EligibilityResponse {
+  eligible: boolean;
+  maxLoanAmount?: number;
+  interestRate?: number;
+  message: string;
+}
 
 class ApiService {
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
@@ -17,14 +33,27 @@ class ApiService {
       ...options,
     };
 
+    console.log(`🔗 API Request: ${options.method || 'GET'} ${url}`);
+
     const response = await fetch(url, config);
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
+      console.error(`❌ API Error: ${response.status}`, errorData);
       throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
     }
 
-    return response.json();
+    const data = await response.json();
+    console.log(`✅ API Success:`, data);
+    return data;
+  }
+
+  // Eligibility API (ADD THIS - it was missing!)
+  async checkEligibility(eligibilityData: EligibilityRequest): Promise<EligibilityResponse> {
+    return this.request<EligibilityResponse>('/api/eligibility/check', {
+      method: 'POST',
+      body: JSON.stringify(eligibilityData),
+    });
   }
 
   // Loan Application APIs
@@ -64,6 +93,12 @@ class ApiService {
       body: JSON.stringify(userData),
     });
   }
+
+  // Health check for testing
+  async healthCheck(): Promise<{ message: string }> {
+    return this.request<{ message: string }>('/api/health');
+  }
 }
 
 export const apiService = new ApiService();
+export type { EligibilityRequest, EligibilityResponse };

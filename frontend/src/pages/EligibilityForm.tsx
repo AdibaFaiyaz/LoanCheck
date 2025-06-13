@@ -352,7 +352,7 @@ const LoanEligibilityForm: React.FC<EligibilityFormProps> = ({
                 }`}
               >
                 <p className="text-lg font-semibold mb-2">
-                  {result.eligible ? "✅ Congratulations!" : "❌ Not Eligible"}
+                  {result.eligible ? "Approved!" : "Not Eligible"}
                 </p>
                 <p className="text-sm">{result.reason}</p>
               </div>

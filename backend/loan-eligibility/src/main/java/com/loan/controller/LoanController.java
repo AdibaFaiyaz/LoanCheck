@@ -1,7 +1,5 @@
 package com.loan.controller;
 
-
-
 import com.loan.entity.LoanApplication;
 import com.loan.entity.User;
 import com.loan.service.LoanApplicationService;
@@ -18,11 +16,9 @@ import java.util.Optional;
 import java.util.HashMap;
 import java.util.Map;
 
-
-
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "*") // Allow all origins for development
+@CrossOrigin(origins = "*") // TODO: Restrict origins in production
 @Validated
 public class LoanController {
     
@@ -31,8 +27,8 @@ public class LoanController {
     
     @Autowired
     private LoanApplicationService applicationService;
-    
-    // 1. Check Eligibility Endpoint
+
+    // 1. Check Eligibility Endpoint (without saving application)
     @PostMapping("/check-eligibility")
     public ResponseEntity<?> checkEligibility(@Valid @RequestBody EligibilityRequestDTO request) {
         try {
@@ -71,17 +67,17 @@ public class LoanController {
         }
     }
     
-    // 2. Save Application Endpoint
+    // 2. Save Application Endpoint (FIXED)
     @PostMapping("/save-application")
     public ResponseEntity<?> saveApplication(@Valid @RequestBody SaveApplicationRequestDTO request) {
         try {
             // Convert DTO to service request
             LoanApplicationService.LoanApplicationRequest serviceRequest = new LoanApplicationService.LoanApplicationRequest();
             
-            // Basic info
+            // Basic info (FIXED: Now including email and phone)
             serviceRequest.setName(request.getName());
-            serviceRequest.setEmail(request.getEmail());
-            serviceRequest.setPhone(request.getPhone());
+            serviceRequest.setEmail(request.getEmail()); // FIXED: Uncommented
+            serviceRequest.setPhone(request.getPhone()); // FIXED: Uncommented
             serviceRequest.setAge(request.getAge());
             serviceRequest.setAnnualIncome(request.getAnnualIncome());
             serviceRequest.setCreditScore(request.getCreditScore());
@@ -119,7 +115,70 @@ public class LoanController {
         }
     }
     
-    // 3. Get Applications by Email
+    // 3. Check Eligibility AND Save Application (NEW ENDPOINT)
+    @PostMapping("/check-eligibility-and-save")
+    public ResponseEntity<?> checkEligibilityAndSave(@Valid @RequestBody SaveApplicationRequestDTO request) {
+        try {
+            // First, check eligibility
+            LoanEligibilityService.EligibilityRequest eligibilityRequest = new LoanEligibilityService.EligibilityRequest(
+                request.getName(),
+                request.getAge(),
+                request.getAnnualIncome(),
+                request.getCreditScore(),
+                request.getMonthlyDebtPayments(),
+                request.getRequestedAmount(),
+                request.getLoanTenure(),
+                request.getEmploymentType()
+            );
+            
+            LoanEligibilityService.EligibilityResult eligibilityResult = eligibilityService.checkEligibility(eligibilityRequest);
+            
+            // Then save the application with complete data
+            LoanApplicationService.LoanApplicationRequest appRequest = new LoanApplicationService.LoanApplicationRequest();
+            appRequest.setName(request.getName());
+            appRequest.setEmail(request.getEmail());
+            appRequest.setPhone(request.getPhone());
+            appRequest.setAge(request.getAge());
+            appRequest.setAnnualIncome(request.getAnnualIncome());
+            appRequest.setCreditScore(request.getCreditScore());
+            appRequest.setMonthlyDebtPayments(request.getMonthlyDebtPayments());
+            appRequest.setRequestedAmount(request.getRequestedAmount());
+            appRequest.setLoanTenure(request.getLoanTenure());
+            appRequest.setEmploymentType(request.getEmploymentType());
+            appRequest.setLoanPurpose(request.getLoanPurpose());
+            appRequest.setEligible(eligibilityResult.isEligible());
+            appRequest.setEligibilityReason(eligibilityResult.getReason());
+            appRequest.setApprovedAmount(eligibilityResult.getApprovedAmount());
+            appRequest.setInterestRate(eligibilityResult.getInterestRate());
+            appRequest.setMonthlyEmi(eligibilityResult.getMonthlyEmi());
+            
+            LoanApplication savedApplication = applicationService.saveApplication(appRequest);
+            
+            // Create comprehensive response
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("eligible", eligibilityResult.isEligible());
+            response.put("reason", eligibilityResult.getReason());
+            response.put("maxLoanAmount", eligibilityResult.getMaxLoanAmount());
+            response.put("approvedAmount", eligibilityResult.getApprovedAmount());
+            response.put("interestRate", eligibilityResult.getInterestRate());
+            response.put("monthlyEmi", eligibilityResult.getMonthlyEmi());
+            response.put("applicationId", savedApplication.getId());
+            response.put("applicationStatus", savedApplication.getStatus());
+            response.put("timestamp", System.currentTimeMillis());
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "Failed to process application");
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+    
+    // 4. Get Applications by Email
     @GetMapping("/get-applications")
     public ResponseEntity<?> getApplications(@RequestParam String email) {
         try {
@@ -142,7 +201,7 @@ public class LoanController {
         }
     }
     
-    // 4. Get All Applications (Admin)
+    // 5. Get All Applications (Admin)
     @GetMapping("/admin/applications")
     public ResponseEntity<?> getAllApplications() {
         try {
@@ -165,7 +224,7 @@ public class LoanController {
         }
     }
     
-    // 5. Get Application by ID
+    // 6. Get Application by ID
     @GetMapping("/application/{id}")
     public ResponseEntity<?> getApplicationById(@PathVariable String id) {
         try {
@@ -194,7 +253,7 @@ public class LoanController {
         }
     }
     
-    // 6. Update Application Status (Admin)
+    // 7. Update Application Status (Admin)
     @PutMapping("/admin/application/{id}/status")
     public ResponseEntity<?> updateApplicationStatus(@PathVariable String id, @RequestBody Map<String, String> statusUpdate) {
         try {
@@ -231,7 +290,7 @@ public class LoanController {
         }
     }
     
-    // 7. Get Application Statistics (Admin)
+    // 8. Get Application Statistics (Admin)
     @GetMapping("/admin/stats")
     public ResponseEntity<?> getApplicationStats() {
         try {
@@ -253,7 +312,7 @@ public class LoanController {
         }
     }
     
-    // 8. Get User by Email
+    // 9. Get User by Email
     @GetMapping("/user")
     public ResponseEntity<?> getUserByEmail(@RequestParam String email) {
         try {
@@ -282,7 +341,7 @@ public class LoanController {
         }
     }
     
-    // 9. Health Check Endpoint
+    // 10. Health Check Endpoint
     @GetMapping("/health")
     public ResponseEntity<?> healthCheck() {
         Map<String, Object> response = new HashMap<>();
@@ -294,8 +353,6 @@ public class LoanController {
         return ResponseEntity.ok(response);
     }
 
-    
-    
     // DTO Classes for Request/Response
     public static class EligibilityRequestDTO {
         @NotBlank(message = "Name is required")
@@ -361,7 +418,7 @@ public class LoanController {
         
         private String loanPurpose;
         
-        // Eligibility results
+        // Eligibility results (optional for the new combined endpoint)
         private boolean eligible;
         private String eligibilityReason;
         private double approvedAmount;

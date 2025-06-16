@@ -68,17 +68,17 @@ Make sure you have the following installed:
 ### 🏠 Home Page
 *The landing page providing an overview of loan services and quick navigation*
 
-![Home Page](./screenshots/home-page.png)
+<img width="925" alt="image" src="https://github.com/user-attachments/assets/c7ce39ed-3e88-46bb-8505-26b724ad714d" />
 
 ### 📋 Eligibility Form
 *Interactive form to check loan eligibility with real-time validation*
 
-![Eligibility Form](./screenshots/eligibility-form.png)
+
 
 ### 📈 Application History
 *Comprehensive view of all loan applications with status tracking*
 
-![Application History](./screenshots/application-history.png)
+
 
 ## 🛠️ Development Commands
 
@@ -125,5 +125,5 @@ npm run lint
 
 ## 📝 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License
 

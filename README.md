@@ -72,9 +72,14 @@ Make sure you have the following installed:
 
 ### 📋 Eligibility Form
 *Interactive form to check loan eligibility with real-time validation*
-
+---
+<h1>Personal Information</h1>
 <img width="920" alt="image" src="https://github.com/user-attachments/assets/bc88f7d5-4f3b-4cd3-ae10-c586ae1ebebe" />
+---
+<h1>Financial Information</h1>
 <img width="920" alt="image" src="https://github.com/user-attachments/assets/d1a62395-d29d-4a12-bea4-992e1db035a1" />
+---
+<h1>Loan Details</h1>
 <img width="920" alt="image" src="https://github.com/user-attachments/assets/e3f3eb3b-51b6-47ca-99e3-e1dfc5a20aa9" />
 
 ## 🛠️ Development Commands

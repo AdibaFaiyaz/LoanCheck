@@ -2,20 +2,20 @@ import { useNavigate } from 'react-router-dom';
 const Home = () => {
    const navigate = useNavigate();
   return (
-    <div className="min-h-screen w-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex flex-col overflow-hidden">
+    <div className="min-h-screen w-screen bg-gradient-to-br from-slate-900 via-gray-700 to-slate-900 flex flex-col overflow-hidden">
       {/* Main Content */}
       <div className="flex-1 flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-5xl">
           {/* Hero Card */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 overflow-hidden h-full">
+          <div className="bg-[#141414] backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 overflow-hidden h-full">
             <div className="px-8 py-12 md:px-12 md:py-16 h-full flex flex-col justify-center">
               {/* Header */}
               <div className="text-center mb-12">
-                <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent mb-6 leading-tight">
+                <h1 className=" will-change-transform text-4xl md:text-6xl font-bold bg-gradient-to-r from-blue-500 via-blue-700 to-blue-900 bg-clip-text text-transparent mb-6 backdrop-blur-sm leading-tight p-10">
                   Loan Eligibility Portal
                 </h1>
-                <div className="w-24 h-1 bg-gradient-to-r from-blue-500 to-indigo-600 mx-auto rounded-full mb-8"></div>
-                <p className="text-lg md:text-xl text-slate-700 leading-relaxed max-w-2xl mx-auto">
+                <div className="w-24 h-1 bg-gradient-to-r from-blue-700 to-indigo-800 mx-auto rounded-full mb-8"></div>
+                <p className="text-lg md:text-xl text-white-700 leading-relaxed max-w-2xl mx-auto">
                   Discover your loan eligibility instantly with our intelligent assessment tool. 
                   Simply provide your income, age, and key financial details to get personalized results 
                   and take confident steps toward achieving your financial aspirations.
@@ -46,8 +46,8 @@ const Home = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
-                  <h3 className="font-semibold text-slate-800 mb-2">Quick Assessment</h3>
-                  <p className="text-sm text-slate-600">Get instant results based on your financial profile</p>
+                  <h3 className="font-semibold text-gray-200 mb-2">Quick Assessment</h3>
+                  <p className="text-sm text-slate-200">Get instant results based on your financial profile</p>
                 </div>
                 
                 <div className="text-center group">
@@ -56,8 +56,8 @@ const Home = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                   </div>
-                  <h3 className="font-semibold text-slate-800 mb-2">Secure & Private</h3>
-                  <p className="text-sm text-slate-600">Your financial information is completely protected</p>
+                  <h3 className="font-semibold text-gray-200 mb-2">Secure & Private</h3>
+                  <p className="text-sm text-slate-200">Your financial information is completely protected</p>
                 </div>
                 
                 <div className="text-center group">
@@ -66,8 +66,8 @@ const Home = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                   </div>
-                  <h3 className="font-semibold text-slate-800 mb-2">Smart Algorithm</h3>
-                  <p className="text-sm text-slate-600">Advanced analysis for accurate eligibility prediction</p>
+                  <h3 className="font-semibold text-gray-200 mb-2">Smart Algorithm</h3>
+                  <p className="text-sm text-slate-200">Advanced analysis for accurate eligibility prediction</p>
                 </div>
               </div>
             </div>

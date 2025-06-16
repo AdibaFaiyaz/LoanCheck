@@ -26,8 +26,8 @@ Make sure you have the following installed:
 
 1. **Clone the repository**
    ```bash
-   git clone <your-repository-url>
-   cd loan-application-system
+   git clone https://github.com/AdibaFaiyaz/LoanCheck.git
+   cd LoanCheck
    ```
 
 2. **Set up MongoDB**

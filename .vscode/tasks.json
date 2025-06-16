@@ -11,6 +11,17 @@
 			"options": {
 				"cwd": "${workspaceFolder}/frontend"
 			}
+		},
+		{
+			"label": "Start Backend Server",
+			"type": "shell",
+			"command": "mvn spring-boot:run",
+			"group": "build",
+			"isBackground": true,
+			"problemMatcher": [],
+			"options": {
+				"cwd": "${workspaceFolder}/backend/loan-eligibility"
+			}
 		}
 	]
 }

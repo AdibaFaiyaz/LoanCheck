@@ -75,9 +75,10 @@ const LoanEligibilityForm: React.FC<EligibilityFormProps> = ({
         requestedAmount: Number(formData.requestedAmount),
         loanTenure: Number(formData.loanTenure),
         employmentType: formData.employmentType,
-      };
-
-      // Call the backend API
+      };      // Call the backend API
+      console.log('Making API call to:', "http://localhost:8080/api/check-eligibility");
+      console.log('Request data:', eligibilityData);
+      
       const response = await fetch(
         "http://localhost:8080/api/check-eligibility",
         {
@@ -89,9 +90,14 @@ const LoanEligibilityForm: React.FC<EligibilityFormProps> = ({
         }
       );
 
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }      const apiResult: EligibilityResponse = await response.json();
+        const errorText = await response.text();
+        console.error('API Error Response:', errorText);
+        throw new Error(`Server Error: ${response.status} - ${errorText || 'Unknown error'}`);
+      }const apiResult: EligibilityResponse = await response.json();
       setResult(apiResult);
 
       // Save the application to database after eligibility check
@@ -127,14 +133,22 @@ const LoanEligibilityForm: React.FC<EligibilityFormProps> = ({
       // Call parent callback if provided and eligible
       if (apiResult.eligible && onEligibilityConfirmed) {
         onEligibilityConfirmed(apiResult);
-      }
-    } catch (err) {
+      }    } catch (err) {
       console.error("Error checking loan eligibility:", err);
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to check loan eligibility. Please try again."
-      );
+      
+      let errorMessage = "Failed to check loan eligibility. Please try again.";
+      
+      if (err instanceof Error) {
+        if (err.message.includes('Failed to fetch')) {
+          errorMessage = "Cannot connect to server. Please ensure the backend server is running on port 8080.";
+        } else if (err.message.includes('Server Error')) {
+          errorMessage = err.message;
+        } else {
+          errorMessage = err.message;
+        }
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -229,14 +243,13 @@ const LoanEligibilityForm: React.FC<EligibilityFormProps> = ({
         <label className="block text-sm font-semibold text-gray-200 mb-2 group-focus-within:text-blue-400 transition-colors">
           Phone Number
         </label>
-        <div className="relative">
-          <input
+        <div className="relative">          <input
             type="tel"
             name="phone"
             value={formData.phone}
             onChange={handleChange}
             className="w-full px-4 py-4 pl-12 bg-gray-700 border-2 border-gray-600 rounded-xl focus:border-blue-500 focus:bg-gray-600 transition-all duration-300 text-white placeholder-gray-400"
-            placeholder="+91 9876543210"
+            placeholder="xxxxx98765"
             required
           />
           <svg className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -501,7 +514,7 @@ const LoanEligibilityForm: React.FC<EligibilityFormProps> = ({
             </div>
           </div>          {/* Main Form Card */}          <div className="bg-gray-800/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-700/50 p-8 transition-all duration-300 hover:shadow-3xl">
             <div className="text-center mb-6">
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-2">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-2 p-10">
                 Loan Eligibility Check
               </h1>
               <p className="text-gray-300">Get instant approval in 3 simple steps</p>
@@ -615,7 +628,7 @@ const LoanEligibilityForm: React.FC<EligibilityFormProps> = ({
                 <h3 className={`text-2xl font-bold mb-2 ${
                   result.eligible ? "text-green-800" : "text-red-800"
                 }`}>
-                  {result.eligible ? "🎉 Congratulations!" : "❌ Not Eligible"}
+                  {result.eligible ? "Approved" : "Not Eligible"}
                 </h3>
                 <p className={`text-lg ${
                   result.eligible ? "text-green-700" : "text-red-700"

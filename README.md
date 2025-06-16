@@ -1,10 +1,10 @@
-# 🏦 Loan Application Management System
+# Loan Eligibility Checker
 
-A modern, full-stack loan application management system built with Spring Boot backend, React/TypeScript frontend, and MongoDB database integration. The application provides a seamless experience for loan eligibility checking, application submission, and application history tracking.
+A modern, full-stack loan application management system built with Spring Boot backend, React/TypeScript frontend, and MongoDB database integration. The application provides a seamless experience for loan eligibility checking.
 
 ## ✨ Features
 
-- 🎯 **Loan Eligibility Calculator** - Real-time eligibility assessment
+- 🎯 **Loan Eligibility Portal** - Real-time eligibility assessment
 - 📝 **Application Management** - Submit and track loan applications
 - 📊 **Application History** - View all previous applications with status
 - 🔒 **Secure Backend** - Spring Boot with robust exception handling
@@ -73,12 +73,9 @@ Make sure you have the following installed:
 ### 📋 Eligibility Form
 *Interactive form to check loan eligibility with real-time validation*
 
-
-
-### 📈 Application History
-*Comprehensive view of all loan applications with status tracking*
-
-
+<img width="920" alt="image" src="https://github.com/user-attachments/assets/bc88f7d5-4f3b-4cd3-ae10-c586ae1ebebe" />
+<img width="920" alt="image" src="https://github.com/user-attachments/assets/d1a62395-d29d-4a12-bea4-992e1db035a1" />
+<img width="920" alt="image" src="https://github.com/user-attachments/assets/e3f3eb3b-51b6-47ca-99e3-e1dfc5a20aa9" />
 
 ## 🛠️ Development Commands
 
@@ -121,9 +118,6 @@ npm run lint
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit your changes (`git commit -m 'Add some amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+5. Open a Pull Request 
 
-## 📝 License
-
-This project is licensed under the MIT License
 

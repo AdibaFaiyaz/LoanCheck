@@ -55,21 +55,23 @@ class ApiService {
       body: JSON.stringify(eligibilityData),
     });
   }
-
   // Loan Application APIs
-  async submitLoanApplication(data: any): Promise<LoanApplication> {
-    return this.request<LoanApplication>('/api/save-application', {
+  async submitLoanApplication(data: any): Promise<any> {
+    const response = await this.request<{ success: boolean; message: string; applicationId: string; status: string; timestamp: number }>('/api/save-application', {
       method: 'POST',
       body: JSON.stringify(data),
     });
+    return response;
+  }
+  // Application management
+  async getAllApplications(): Promise<LoanApplication[]> {
+    const response = await this.request<{ success: boolean; applications: LoanApplication[] }>('/api/admin/applications');
+    return response.applications;
   }
 
   async getApplicationById(id: string): Promise<LoanApplication> {
-    return this.request<LoanApplication>(`/api/applications/${id}`);
-  }
-
-  async getAllApplications(): Promise<LoanApplication[]> {
-    return this.request<LoanApplication[]>('/api/applications');
+    const response = await this.request<{ success: boolean; application: LoanApplication }>(`/api/application/${id}`);
+    return response.application;
   }
 
   async updateApplicationStatus(id: string, status: string): Promise<LoanApplication> {

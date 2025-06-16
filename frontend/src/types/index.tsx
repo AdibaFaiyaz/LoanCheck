@@ -1,20 +1,25 @@
 export interface LoanApplication {
   id: string;
-  applicantName: string;
+  userId?: string;
+  name: string; // Backend sends 'name', not 'applicantName'
   email: string;
   phone: string;
-  annualIncome: number;
-  loanAmount: number;
-  creditScore: number;
   age: number;
-  employmentType: string;
+  annualIncome: number;
+  requestedAmount: number; // Backend sends 'requestedAmount', not 'loanAmount'
+  creditScore: number;
   monthlyDebtPayments: number;
   loanTenure: number;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'UNDER_REVIEW';
+  employmentType: string;
+  loanPurpose?: string;
   eligible: boolean;
-  reason: string;
-  appliedDate: string;
-  lastUpdated: string;
+  eligibilityReason: string; // Backend sends 'eligibilityReason', not 'reason'
+  approvedAmount: number;
+  interestRate: number;
+  monthlyEmi: number;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'UNDER_REVIEW';
+  createdAt: string; // Backend sends 'createdAt', not 'appliedDate'
+  updatedAt: string; // Backend sends 'updatedAt', not 'lastUpdated'
 }
 
 export interface User {

@@ -38,7 +38,7 @@ const Home = () => {
               {/* CTA Section */}
               <div className="text-center mb-16">
                 <button
-                   onClick={() => navigate('/loan-eligibility')}
+                   onClick={() => navigate('/auth')}
                   className="group relative inline-flex items-center justify-center px-12 py-5 text-xl font-semibold text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-2xl hover:shadow-blue-500/25 transform hover:-translate-y-2 hover:scale-105 transition-all duration-300 ease-out border-0 overflow-hidden"
                 >
                   <span className="absolute inset-0 bg-gradient-to-r from-blue-700 to-purple-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>

@@ -1,6 +1,8 @@
 package com.loan.entity;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -17,12 +19,16 @@ public class User {
     @Indexed(unique = true)
     private String email;
     
+    private String password;
+    
     private String phone;
     
     @Field("created_at")
+    @CreatedDate
     private LocalDateTime createdAt;
     
     @Field("updated_at")
+    @LastModifiedDate
     private LocalDateTime updatedAt;
     
     // Additional user fields (optional)
@@ -42,6 +48,15 @@ public class User {
         this.updatedAt = LocalDateTime.now();
     }
     
+    public User(String name, String email, String password, String phone) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.phone = phone;
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+    
     // Getters and Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
@@ -51,6 +66,9 @@ public class User {
     
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+    
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
     
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
